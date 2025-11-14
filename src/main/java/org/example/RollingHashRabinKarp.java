@@ -1,3 +1,4 @@
+package org.example;
 import java.util.*;
 
 public class RollingHashRabinKarp {
@@ -13,7 +14,8 @@ public class RollingHashRabinKarp {
      * @param pattern the substring to find
      * @return list of starting indices of all matches
      */
-    public static List<Integer> rabinKarp(String text, String pattern) {
+
+    public static List<Integer> search(String text, String pattern) {
         List<Integer> result = new ArrayList<>();
         int n = text.length();
         int m = pattern.length();
