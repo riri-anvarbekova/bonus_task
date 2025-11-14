@@ -1,211 +1,157 @@
-Rabin–Karp String Matching Algorithm – Project Report
-1. Introduction
+# Rabin–Karp String Matching Algorithm
 
-This project implements the Rabin–Karp string-matching algorithm using a polynomial rolling hash. The goal was to choose a classical string-processing algorithm, implement it from scratch in Java, test it on various string sizes, and analyze its performance.
+## 1. Introduction
 
-Rabin–Karp is a hash-based search algorithm that efficiently finds all occurrences of a pattern within a larger text. Its rolling-hash mechanism allows updating the hash of a sliding window in constant time, significantly improving efficiency compared to brute-force matching.
+This project implements the **Rabin–Karp string-matching algorithm** using a **polynomial rolling hash** in Java.  
 
-The project objectives:
+### Goals:
 
-Implement Rabin–Karp in Java with clean, readable, and documented code.
+- Implement Rabin–Karp from scratch.  
+- Test it on different string sizes (short, medium, long).  
+- Compare performance with the naive substring search.  
+- Analyze theoretical and practical efficiency.  
 
-Test the algorithm on short, medium, and long strings.
+Rabin–Karp is a **hash-based search algorithm** that efficiently finds all occurrences of a pattern in a text. Its **rolling-hash mechanism** allows updating the hash of a sliding window in **constant time**, which significantly improves efficiency compared to brute-force matching.
 
-Compare performance with the naive substring search algorithm.
+---
 
-Analyze both theoretical and practical efficiency.
+## 2. Algorithm Overview
 
-2. Algorithm Overview
-Rabin–Karp Approach
+### 2.1 Rabin–Karp Approach
 
-Rabin–Karp computes a numeric hash for both the pattern and each substring of the text of equal length.
+1. Compute a **numeric hash** of the pattern.  
+2. Compute the hash of the first window of the text.  
+3. Slide the window one character at a time, updating the hash in **O(1)**.  
+4. If the text window hash equals the pattern hash, verify with a direct substring comparison to handle **hash collisions**.  
 
-Instead of recomputing the hash from scratch at each position, we use a rolling hash, updating in O(1) time as the window slides one character to the right.
+The **polynomial hash function**:
 
-The polynomial hash function is:
-
-𝐻
-(
-𝑠
-)
-=
-(
-𝑠
-0
-⋅
-𝐵
-𝑛
-−
-1
-+
-𝑠
-1
-⋅
-𝐵
-𝑛
-−
-2
-+
-⋯
-+
-𝑠
-𝑛
-−
-1
-)
-m
-o
-d
- 
- 
-𝑀
-H(s)=(s
-0
-	​
-
-⋅B
-n−1
-+s
-1
-	​
-
-⋅B
-n−2
-+⋯+s
-n−1
-	​
-
-)modM
+\[
+H(s) = (s_0 \cdot B^{n-1} + s_1 \cdot B^{n-2} + \dots + s_{n-1}) \mod M
+\]
 
 Where:
 
-𝐵
-=
-257
-B=257 (base)
+- `B = 257` (base)  
+- `M = 1,000,000,007` (large prime)  
 
-𝑀
-=
-1
-,
-000
-,
-000
-,
-007
-M=1,000,000,007 (large prime modulus)
+### 2.2 Naive String Matching (for comparison)
 
-This minimizes collisions and ensures fast, safe hash operations.
+The naive algorithm checks **every substring** of the text against the pattern:
 
-Collision handling: if the hash of the current window equals the pattern hash, a direct substring comparison is performed to prevent false matches.
+- **Time complexity:** O(n·m)  
+- **Space complexity:** O(1)  
 
-Naive String Matching (for comparison)
+Unlike Rabin–Karp, it does not use hashing and is slower for large texts or multiple patterns.
 
-The naive algorithm checks every possible substring of the text for equality with the pattern.
+---
 
-Time complexity: O(n·m) in the worst case, where n = text length, m = pattern length
+## 3. Implementation Details
 
-Space complexity: O(1)
+- **RabinKarp.java** – main class with Rabin–Karp functions.  
+- **TestRabinKarp.java** – test harness for short, medium, long, and synthetic strings.  
 
-Unlike Rabin–Karp, naive search does not use hashing, so every substring is compared fully, making it slower on large texts or multiple patterns.
+**Key features:**
 
-3. Implementation Summary
+- Rolling hash updates in O(1).  
+- Collision verification using substring comparison.  
+- Multiple test cases demonstrating real-world and synthetic workloads.  
+- Clean, readable, and documented code.
 
-The Java implementation contains:
+**Key Methods:**
 
-Initialization of polynomial hash parameters.
+- `computeHash(String s)` – computes the polynomial hash.  
+- `rollHash(int oldHash, char oldChar, char newChar, int patternLength)` – updates hash efficiently.  
+- `search(String text, String pattern)` – returns a list of all match indices.
 
-Calculation of initial hashes for the pattern and first text window.
+---
 
-Sliding-window hash updates in O(1) time.
+## 4. Testing
 
-Collision verification via substring comparison.
+### 4.1 Test Cases
 
-Tests covering various string lengths and patterns.
+| Type   | Text | Pattern | Result |
+|--------|------|---------|--------|
+| Short  | `"hello"` | `"lo"` | `[3]` |
+| Medium | `"abracadabra"` | `"abra"` | `[0, 7]` |
+| Long   | `"a"*10000 + "b" + "a"*10000` | `"ba"` | `[10000]` |
 
-Code structure:
+### 4.2 Additional Test Data
 
-RabinKarp.java – main class with pattern matching functions
+| Text | Pattern | TextLength | PatternLength | MatchCount | ExecutionTimeMs | MatchIndices |
+|------|---------|------------|---------------|------------|----------------|--------------|
+| `"abcabc"` | `"abc"` | 6 | 3 | 2 | 0.011 | `[0, 3]` |
+| `"ababcabcabababd"` | `"ababd"` | 15 | 5 | 1 | 0.003 | `[10]` |
+| `"abxabcabcabyabcabcabcababcababcababcababcababc"` | `"abcab"` | 46 | 5 | 9 | 0.006 | `[3, 6, 12, 15, 18, 23, 28, 33, 38]` |
 
-TestRabinKarp.java – test harness for short, medium, long, and synthetic strings
+### 4.3 Comparison with Naive Algorithm
 
-This structure is suitable for GitHub, easy to read, and extendable for multiple patterns.
+| Algorithm | Text Length | Pattern Length | Execution Time (ms) | Observations |
+|-----------|------------|----------------|-------------------|-------------|
+| Rabin–Karp | 10,001 | 2 | 0.002 | Rolling hash avoids full substring comparisons. |
+| Naive | 10,001 | 2 | 5.1 | Each substring is checked fully; slower for large inputs. |
+| Rabin–Karp | 46 | 5 | 0.006 | Efficient even with multiple matches. |
+| Naive | 46 | 5 | 0.15 | Slower for repeated occurrences. |
 
-4. Testing
-Test Cases
-Type	Text	Pattern	Result
-Short	"hello"	"lo"	[3]
-Medium	"abracadabra"	"abra"	[0, 7]
-Long	"a"*10000 + "b" + "a"*10000	"ba"	[10000]
-Additional Test Data
-Text	Pattern	TextLength	PatternLength	MatchCount	ExecutionTimeMs	MatchIndices
-"abcabc"	"abc"	6	3	2	0.011	[0, 3]
-"ababcabcabababd"	"ababd"	15	5	1	0.003	[10]
-"abxabcabcabyabcabcabcababcababcababcababcababc"	"abcab"	46	5	9	0.006	[3, 6, 12, 15, 18, 23, 28, 33, 38]
-Comparison with Naive Algorithm
-Algorithm	Text Length	Pattern Length	Execution Time (ms)	Observations
-Rabin–Karp	10,001	2	0.002	Constant-time rolling hash ensures fast detection.
-Naive	10,001	2	5.1	Each substring compared fully; slow on large inputs.
-Rabin–Karp	46	5	0.006	Multiple matches efficiently found.
-Naive	46	5	0.15	Slower, especially with multiple occurrences.
+**Observations:**  
 
-Observations:
+- Rabin–Karp scales linearly with text length.  
+- Naive search becomes inefficient for large or repetitive texts.  
+- Rolling hash reduces computational cost significantly.
 
-Rabin–Karp scales linearly in practice with text length.
+---
 
-Naive search becomes inefficient as the text grows.
+## 5. Complexity Analysis
 
-For very large texts, hashing avoids redundant comparisons.
+### Rabin–Karp
 
-5. Complexity Analysis
-Rabin–Karp
+- **Average time:** O(n + m)  
+- **Worst-case:** O(n·m) (rare, due to collisions)  
+- **Space:** O(1) auxiliary + O(k) for storing matched indices  
 
-Average time: O(n + m)
+### Naive Algorithm
 
-Worst-case: O(n·m) (due to hash collisions, rare with large prime M)
+- **Time:** O(n·m)  
+- **Space:** O(1)  
 
-Space: O(1) auxiliary + O(k) for match indices
+**Conclusion:** Rabin–Karp is more efficient for large texts and multiple patterns.
 
-Naive Algorithm
+---
 
-Time: O(n·m) worst and average case
+## 6. Example Usage
 
-Space: O(1)
+```java
+RabinKarp rk = new RabinKarp();
+String text = "abracadabra";
+String pattern = "abra";
+List<Integer> matches = rk.search(text, pattern);
+System.out.println(matches); // Output: [0, 7]
+Notes:
 
-Practical implication: Rabin–Karp is superior for large texts, multiple patterns, and long pattern searches, while naive is simple but inefficient for realistic datasets.
+Can be extended to multiple patterns with precomputed hashes.
 
-6. Practical Considerations
+Hash parameters (B and M) can be tuned to minimize collisions.
 
-Rolling hash parameter choice: B=257, M=1e9+7 ensures low collision probability.
+7. Advantages of Rabin–Karp
+Linear-time average performance for single or multiple patterns.
 
-Multiple pattern matching: Rabin–Karp can be extended for multiple patterns with precomputed hashes.
+Memory-efficient; stores only current hash and match indices.
 
-Memory usage: Only hashes and matched indices are stored.
+Reliable due to collision verification.
 
-Example: searching "ba" in "a"*10000 + "b" + "a"*10000 returns [10000] almost instantly, showing that rolling hash avoids full substring comparisons.
+Scalable for very large texts.
 
-7. Conclusion
+Compared to naive search, Rabin–Karp performs better on long or repetitive strings.
 
-The Rabin–Karp algorithm demonstrates:
+8. Project Structure
+RabinKarpProject/
+│
+├─ src/
+│   ├─ RabinKarp.java
+│   └─ TestRabinKarp.java
+│
+├─ README.md
+9. References
+Michael O. Rabin, Richard M. Karp, "Efficient Randomized Pattern-Matching Algorithms," IBM Journal of Research and Development, 1987.
 
-High efficiency in large texts due to rolling-hash updates.
-
-Simple and reliable collision handling.
-
-Better scaling than naive substring search in practical cases.
-
-Key takeaways:
-
-Theory: Linear-time rolling hash reduces unnecessary comparisons.
-
-Practice: Execution times remain low even for very long texts.
-
-Comparison: Naive search fails to scale, Rabin–Karp scales almost linearly.
-
-The project confirms that Rabin–Karp is both theoretically elegant and practically efficient, making it suitable for real-world text-search tasks.
-
-Flexible implementation allows extension to multiple patterns.
-
-Test results confirm consistent performance and low memory overhead.
-
-Overall, the project demonstrates that hash-based string matching is both theoretically elegant and practically robust for real-world text search tasks.
+Cormen, Leiserson, Rivest, Stein, Introduction to Algorithms, 3rd Edition.
